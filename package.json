@@ -4,12 +4,6 @@
   "description": "Flexible rate limiting middleware with Redis support",
   "main": "index.js",
   "type": "module",
-  "files": [
-    "README.md",
-    "index.js",
-    "rate-limiter.js",
-    "storage-strategies/"
-  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js",
