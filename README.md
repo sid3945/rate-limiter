@@ -13,6 +13,35 @@ A flexible and robust rate limiting middleware for Node.js applications with sup
 - 🔒 Thread-safe and distributed-safe (when using Redis)
 - ⚡ Lightweight with minimal dependencies
 
+## Installation
+
+```bash
+npm install @yourusername/rate-limiter
+```
+
+## Quick Start
+
+```javascript
+import express from 'express';
+import RateLimiter from '@yourusername/rate-limiter';
+
+const app = express();
+
+// Basic in-memory rate limiting
+const rateLimiter = new RateLimiter({
+  window: 3000,  // 3 seconds
+  maxHits: 3     // 3 requests per window
+});
+
+app.use(rateLimiter.guard());
+
+app.get('/test', (req, res) => {
+  res.json({ message: 'Hello!' });
+});
+
+app.listen(3000);
+```
+
 ## Configuration Options
 
 ### Basic Configuration
@@ -116,6 +145,13 @@ app.use('/api/public', publicLimiter.guard());
 app.use('/api/private', authenticatedLimiter.guard());
 ```
 
+## Performance Considerations
+
+- In-memory storage has minimal impact on request latency
+- Redis storage adds network latency but enables distributed rate limiting
+- Redis keys automatically expire after the window period
+- Careful consideration needed for high-traffic applications
+
 ## Error Handling
 
 The middleware includes built-in error handling:
@@ -126,6 +162,21 @@ The middleware includes built-in error handling:
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT
+
+## Author
+
+[Your Name]
+
+## Changelog
+
+### 1.0.0
+- Initial release
+- Support for in-memory and Redis storage
+- Basic rate limiting functionality
 
 ## Todo
 - [ ] Add support for sliding windows
