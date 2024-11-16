@@ -1,6 +1,17 @@
-let instance = null;
-class RateLimter{
-  constructor({window, maxHits, identifier='ip', customIdentifierExtractor=null}){
+let instance;
+
+import RedisStorage from "./storage-strategies/redis-storage.js";
+import InMemoryStorage from "./storage-strategies/in-memory-storage.js";
+
+class RateLimiter {
+  constructor({
+    window,
+    maxHits,
+    identifier = 'ip',
+    customIdentifierExtractor = null,
+    storage = 'memory',
+    redisConfig = null
+  }) {
     if (instance) {
       return instance;
     }
@@ -8,8 +19,17 @@ class RateLimter{
     this.window = window;
     this.maxHits = maxHits;
     this.identifier = identifier;
-    this.requests = new Map();
     this.customIdentifierExtractor = customIdentifierExtractor;
+
+    // Initialize storage strategy
+    if (storage === 'redis') {
+      if (!redisConfig) {
+        throw new Error('Redis configuration is required when using Redis storage');
+      }
+      this.storage = new RedisStorage(redisConfig);
+    } else {
+      this.storage = new InMemoryStorage();
+    }
 
     instance = this;
   }
@@ -32,36 +52,28 @@ class RateLimter{
   }
 
   guard() {
-    return (req, res, next) => {
-      const id = this.getIdentifier(req);
-      const now = Date.now();
+    return async (req, res, next) => {
+      try {
+        const id = this.getIdentifier(req);
+        const requestData = await this.storage.increment(id, this.window);
+        
+        // Only check rate limit if we have valid request data
+        if (requestData.count > this.maxHits) {
+          const retryAfter = Math.ceil((requestData.timestamp + this.window - Date.now()) / 1000);
+          return res.status(429).json({
+            error: "Too many requests",
+            retryAfter
+          });
+        }
 
-      if (!this.requests.has(id)) {
-        this.requests.set(id, { count: 1, timestamp: now });
-        setTimeout(() => this.requests.delete(id), this.window);
-        return next();
+        next();
+      } catch (error) {
+        console.error('Rate limiter error:', error);
+        // In case of storage errors, allow the request to proceed
+        next();
       }
-
-      const requestData = this.requests.get(id);
-
-      if (now - requestData.timestamp > this.window) {
-        requestData.count = 1;
-        requestData.timestamp = now;
-        return next();
-      }
-
-      requestData.count++;
-
-      if (requestData.count > this.maxHits) {
-        return res.status(429).json({
-          error: "Too many requests",
-          retryAfter: Math.ceil((requestData.timestamp + this.window - now) / 1000),
-        });
-      }
-
-      next();
     };
   }
 }
 
-export default RateLimter;
+export default RateLimiter;
