@@ -1,6 +1,6 @@
 {
   "name": "@sid3945/rate-limiter",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Flexible rate limiting middleware with Redis support",
   "main": "index.js",
   "type": "module",
