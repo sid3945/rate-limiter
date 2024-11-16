@@ -16,7 +16,7 @@ A flexible and robust rate limiting middleware for Node.js applications with sup
 ## Installation
 
 ```bash
-npm install @yourusername/rate-limiter
+npm install @sid3945/rate-limiter
 ```
 
 ## Quick Start
@@ -27,16 +27,15 @@ import RateLimiter from '@yourusername/rate-limiter';
 
 const app = express();
 
-// Basic in-memory rate limiting
 const rateLimiter = new RateLimiter({
-  window: 3000,  // 3 seconds
-  maxHits: 3     // 3 requests per window
+  window: 3000,  // 3 seconds from the first request from this source
+  maxHits: 3     // 3 requests per window 
 });
 
 app.use(rateLimiter.guard());
 
-app.get('/test', (req, res) => {
-  res.json({ message: 'Hello!' });
+app.get('/_healthz', (req, res) => {
+  res.json({ message: 'Status Ok!' });
 });
 
 app.listen(3000);
@@ -51,7 +50,7 @@ const rateLimiter = new RateLimiter({
   window: 3000,       // Time window in milliseconds
   maxHits: 3,         // Maximum number of requests per window
   identifier: 'ip',   // Identifier strategy ('ip', 'authToken', 'cookie')
-  storage: 'memory'   // Storage strategy ('memory' or 'redis')
+  storage: 'memory'   // Storage strategy ('in-memory' or 'redis')
 });
 ```
 
@@ -65,8 +64,7 @@ const rateLimiter = new RateLimiter({
   redisConfig: {
     host: 'localhost',
     port: 6379,
-    password: 'your-password',  // if required
-    db: 0                       // Redis database number
+    password: 'your-password', db: 0 // Redis database number
   }
 });
 ```
@@ -105,7 +103,7 @@ When rate limit is exceeded, the middleware returns:
 ```javascript
 {
   error: "Too many requests",
-  retryAfter: 3  // Seconds until the window resets
+  retryAfter: 3
 }
 ```
 
@@ -138,10 +136,8 @@ const authenticatedLimiter = new RateLimiter({
   identifier: 'authToken'
 });
 
-// Public endpoints
 app.use('/api/public', publicLimiter.guard());
 
-// Authenticated endpoints
 app.use('/api/private', authenticatedLimiter.guard());
 ```
 
@@ -169,7 +165,7 @@ MIT
 
 ## Author
 
-[Your Name]
+Siddharth Upadhyay
 
 ## Changelog
 
@@ -177,6 +173,9 @@ MIT
 - Initial release
 - Support for in-memory and Redis storage
 - Basic rate limiting functionality
+
+### 1.0.2 
+- Updated documentation (and reduced GEN AI footprint 😁)
 
 ## Todo
 - [ ] Add support for sliding windows
