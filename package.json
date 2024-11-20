@@ -11,11 +11,18 @@
   },
   "keywords": [
     "rate-limit",
+    "rate-limiter",
+    "rate limiter",
+    "request-limiter",
+    "concurrent",
+    "concurrency",
     "express",
     "middleware",
     "redis",
     "distributed",
-    "rate limiter"
+    "trottling",
+    "security",
+    "ip"
   ],
   "author": "Siddharth Upadhyay",
   "license": "MIT",
